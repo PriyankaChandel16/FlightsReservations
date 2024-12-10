@@ -1,0 +1,107 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f9;
+  }
+  
+  header {
+    background-color: #333;
+    color: white;
+    padding: 1rem;
+    text-align: center;
+  }
+  
+  .container {
+    padding: 2rem;
+    max-width: 800px;
+    margin: 0 auto;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+  
+  .form-group {
+    margin-bottom: 1rem;
+  }
+  
+  label {
+    display: block;
+    font-weight: bold;
+  }
+  
+  input, select, button {
+    width: 100%;
+    padding: 0.8rem;
+    margin: 0.5rem 0;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+  }
+  
+  button {
+    background-color: #333;
+    color: white;
+    cursor: pointer;
+  }
+  
+  button:hover {
+    background-color: #555;
+  }
+  
+  .flights-list, .bookings-list {
+    margin-top: 2rem;
+  }
+  
+  .flights-list ul, .bookings-list ul {
+    list-style: none;
+    padding: 0;
+  }
+  
+  .flights-list li, .bookings-list li {
+    background-color: #f9f9f9;
+    padding: 1rem;
+    margin: 0.5rem 0;
+    border-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+  
+  .action-btns {
+    margin-top: 10px;
+  }
+  
+  .modify-btn, .delete-btn {
+    padding: 0.5rem 1rem;
+    margin-right: 10px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    cursor: pointer;
+  }
+  
+  .modify-btn:hover, .delete-btn:hover {
+    background-color: #0056b3;
+  }
+  
+  .logout-btn {
+    padding: 0.8rem 1.5rem;
+    background-color: #ff4b5c;
+    color: white;
+    border: none;
+    cursor: pointer;
+    margin-top: 20px;
+    font-size: 16px;
+    display: block;
+    width: 100%;
+  }
+  
+  .logout-btn:hover {
+    background-color: #ff2f3c;
+  }
+  
+  .alert {
+    color: red;
+    font-size: 0.9rem;
+    margin-top: 10px;
+  }
+  
+

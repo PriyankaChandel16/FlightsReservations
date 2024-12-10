@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f9;
+  }
+  header {
+    background-color: #333;
+    color: white;
+    padding: 1rem;
+    text-align: center;
+  }
+  .container {
+    padding: 2rem;
+    max-width: 800px;
+    margin: 0 auto;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+  .form-group {
+    margin-bottom: 1rem;
+  }
+  label {
+    display: block;
+    font-weight: bold;
+  }
+  input, button {
+    width: 100%;
+    padding: 0.8rem;
+    margin: 0.5rem 0;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+  }
+  button {
+    background-color: #333;
+    color: white;
+    cursor: pointer;
+  }
+  button:hover {
+    background-color: #555;
+  }
+  .flights-list, .bookings-list {
+    margin-top: 2rem;
+  }
+  .flights-list ul, .bookings-list ul {
+    list-style: none;
+    padding: 0;
+  }
+  .flights-list li, .bookings-list li {
+    background-color: #f9f9f9;
+    padding: 1rem;
+    margin: 0.5rem 0;
+    border-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+  .alert {
+    color: red;
+    font-size: 0.9rem;
+    margin-top: 10px;
+  }</style>
+  <title>Signup</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header>
+    <h1>Flight Booking System - Signup</h1>
+  </header>
+  <div class="container">
+    <form id="signup-form">
+      <div class="form-group">
+        <label for="signup-username">Username</label>
+        <input type="text" id="signup-username" required>
+      </div>
+      <div class="form-group">
+        <label for="signup-password">Password</label>
+        <input type="password" id="signup-password" required>
+      </div>
+      <div class="form-group">
+        <label for="signup-role">Role</label>
+        <input type="text" id="signup-role" required>
+      </div>
+      <button type="submit">Sign Up</button>
+      <div id="signup-alert" class="alert"></div>
+    </form>
+    <p>Already have an account? <a href="login.html">Login here</a>.</p>
+  </div>
+  <script src="signup.js"></script>
+</body>
+</html>

@@ -62,5 +62,21 @@ async function getFlightById(id) {
     });
   });
 }
+//// Delete a flight by ID
+async function deleteFlightById(id) {
+  return new Promise((resolve, reject) => {
+    const query = `DELETE FROM flights WHERE id = ?`;
+    db.run(query, [id], function (err) {
+      if (err) return reject(err);
+      if (this.changes === 0) {
+        return reject(new Error("Flight not found"));
+      }
+      resolve({ message: "Flight deleted successfully", id });
+    });
+  });
+}
 
-module.exports = { getAllFlights, addFlight, getFlightById, searchFlights };
+module.exports = { getAllFlights, addFlight, getFlightById, searchFlights, deleteFlightById };
+
+
+

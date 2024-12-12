@@ -39,7 +39,7 @@ const createTables = () => {
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       flight_id INTEGER NOT NULL,
       user_id INTEGER NOT NULL,
-      seat_count INTEGER NOT NULL,
+      seat_count INTEGER,
       booking_status TEXT NOT NULL CHECK(booking_status IN ('pending', 'confirmed', 'cancelled')),
       FOREIGN KEY (flight_id) REFERENCES flights (id),
       FOREIGN KEY (user_id) REFERENCES users (id)

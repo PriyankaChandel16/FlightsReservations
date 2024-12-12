@@ -1,173 +1,258 @@
 let bookings = [];
-let modifyingIndex = -1; // Track the booking being modified
-let selectedFlight = null; // Selected flight for booking
+let selectedFlight = null; // Store the selected flight for booking
+const airlineMapping = {
+  "USA": "Emirates",
+  "UK": "British Airways",
+  "India": "Indigo",
+};
 
-// Function to simulate searching for flights
-document.getElementById('search-flights').addEventListener('click', () => {
-  let countryFrom = document.getElementById('country-from').value;
-  let countryTo = document.getElementById('country-to').value;
-  let travelDate = document.getElementById('travel-date').value;
-  let tripType = document.getElementById('trip-type').value;
-  let returnDate = document.getElementById('return-date').value;
+let flights = [];
 
-  // Validate input
-  if (!countryFrom || !countryTo || !travelDate || !tripType) {
-    alert('Please fill all required fields!');
+window.onload = function () {
+  getFlights();  
+};
+
+// Function to fetch flights dynamically from the backend
+async function getFlights() {
+  try {
+    const response = await fetch("http://localhost:8001/flights", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    const data = await response.json();
+    flights = data;
+    const flightsList = document.getElementById("flights-list");
+    flightsList.innerHTML = ""; // Clear existing flights
+
+    if (response.ok && data.flights.length > 0) {
+      data.flights.forEach((flight) => {
+        const listItem = document.createElement("li");
+        listItem.innerHTML = `
+          ${airlineMapping[flight.origin] || "Unknown Airline"} - ${flight.origin} to ${flight.destination} on ${flight.departure_date} 
+          - $${flight.price}
+          <button class="action-btns" onclick="selectFlight(${flight.id})">Select</button>
+        `;
+        flightsList.appendChild(listItem);
+      });
+      fetchBookings();
+    } else {
+      flightsList.innerHTML = "<li>No flights available at the moment.</li>";
+    }
+  } catch (error) {
+    console.error("Error fetching flights:", error);
+    alert("An error occurred while fetching the flights. Please try again later.");
+  }
+}
+
+// Function to search flights based on user input
+document.getElementById("search-flights").addEventListener("click", () => {
+  const countryFrom = document.getElementById("country-from").value;
+  const countryTo = document.getElementById("country-to").value;
+  const travelDate = document.getElementById("travel-date").value;
+
+  if (!countryFrom || !countryTo || !travelDate) {
+    alert("Please fill all required fields!");
     return;
   }
 
-  // Simulate available flights with airline names
-  const flights = [
-    { id: 1, from: countryFrom, to: countryTo, date: travelDate, price: 500, airline: 'Emirates' },
-    { id: 2, from: countryFrom, to: countryTo, date: travelDate, price: 600, airline: 'Indigo' },
-    { id: 3, from: countryFrom, to: countryTo, date: travelDate, price: 700, airline: 'Vistara' },
-  ];
-
-  // Display the flights
-  let flightsList = document.getElementById('flights-list');
-  flightsList.innerHTML = '';
-  flights.forEach(flight => {
-    let li = document.createElement('li');
-    li.innerHTML = `${flight.airline} - ${flight.from} to ${flight.to} on ${flight.date} - $${flight.price}
-    <button class="action-btns" onclick="selectFlight(${flight.id})">Select</button>`;
-    flightsList.appendChild(li);
+  // Filter flights (assuming a backend filter API for production)
+  const filteredFlights = document.querySelectorAll("#flights-list li");
+  filteredFlights.forEach((flight) => {
+    const flightText = flight.textContent.toLowerCase();
+    if (
+      flightText.includes(countryFrom.toLowerCase()) &&
+      flightText.includes(countryTo.toLowerCase()) &&
+      flightText.includes(travelDate)
+    ) {
+      flight.style.display = "list-item";
+    } else {
+      flight.style.display = "none";
+    }
   });
 });
 
 // Function to select a flight for booking
 function selectFlight(flightId) {
-  // Get the flight from the available flights
-  const flight = [
-    { id: 1, from: 'USA', to: 'UK', date: '2024-12-15', price: 500, airline: 'Emirates' },
-    { id: 2, from: 'USA', to: 'UK', date: '2024-12-20', price: 600, airline: 'Indigo' },
-    { id: 3, from: 'USA', to: 'UK', date: '2024-12-25', price: 700, airline: 'Vistara' },
-  ].find(f => f.id === flightId);
+  // Fetch flight details from the backend (optional for production)
+  const flightsList = document.querySelectorAll("#flights-list li");
+  const flightElement = Array.from(flightsList).find((item) =>
+    item.innerHTML.includes(`onclick="selectFlight(${flightId})"`)
+  );
 
-  if (!flight) {
-    alert('Flight not found!');
+  if (!flightElement) {
+    alert("Flight not found!");
     return;
   }
 
-  selectedFlight = flight; // Set the selected flight
+  let flight = flights.flights.find((i)=> {
+    return i.id == flightId
+  });
+  // Extract flight details (for simplicity, parsing from the DOM)
+  selectedFlight = {
+    flight_id: flight.id,
+    airline: airlineMapping[flight.origin] || "Unknown Airline",
+    origin: flight.origin,
+    destination: flight.destination,
+    departure_date: flight.departure_date,
+    arrival_date: flight.arrival_date, // Ensure this property exists in your flight data
+    price: flight.price,
+  };
 
-  // Display the selected flight details
-  document.getElementById('flight-details').innerHTML = `${flight.airline} - ${flight.from} to ${flight.to} on ${flight.date}`;
-  document.getElementById('selected-flight').style.display = 'block';
-  document.getElementById('pay-now-btn').style.display = 'block';
-  document.getElementById('payment-section').style.display = 'none'; // Hide payment section initially
+  document.getElementById("flight-details").innerHTML = `
+    ${selectedFlight.airline} - ${selectedFlight.origin} to ${selectedFlight.destination} on ${selectedFlight.departure_date}
+  `;
+  document.getElementById("selected-flight").style.display = "block";
+  document.getElementById("pay-now-btn").style.display = "block";
+  document.getElementById("payment-section").style.display = "none";
 }
 
-// Handle the "Proceed to Payment" button click
-document.getElementById('pay-now-btn').addEventListener('click', function() {
-  // Show the payment form once "Proceed to Payment" is clicked
-  document.getElementById('payment-section').style.display = 'block';
+document.getElementById("pay-now-btn").addEventListener("click", async () => {
+  document.getElementById("payment-section").style.display = "block";
 });
 
-// Function to handle payment
-document.getElementById('payment-form').addEventListener('submit', function(e) {
+// Handle payment form submission
+document.getElementById("payment-form").addEventListener("submit", async (e) => {
   e.preventDefault();
 
-  let cardNumber = document.getElementById('card-number').value;
-  let expiryMonth = document.getElementById('expiry-month').value;
-  let expiryYear = document.getElementById('expiry-year').value;
-  let cvv = document.getElementById('cvv').value;
-  let errorMessage = document.getElementById('payment-error');
+  const cardNumber = document.getElementById("card-number").value;
+  const expiryMonth = document.getElementById("expiry-month").value;
+  const expiryYear = document.getElementById("expiry-year").value;
+  const cvv = document.getElementById("cvv").value;
+  const errorMessage = document.getElementById("payment-error");
 
-  // Validate card number (must be 16 digits)
+  // Validate inputs
   if (cardNumber.length !== 16) {
-    errorMessage.textContent = 'Card number must be 16 digits!';
-    errorMessage.style.display = 'block';
+    errorMessage.textContent = "Card number must be 16 digits!";
+    errorMessage.style.display = "block";
     return;
   }
-
-  // Validate CVV (must be 3 digits)
   if (cvv.length !== 3) {
-    errorMessage.textContent = 'CVV must be 3 digits!';
-    errorMessage.style.display = 'block';
+    errorMessage.textContent = "CVV must be 3 digits!";
+    errorMessage.style.display = "block";
     return;
   }
-
-  // Validate expiry date
   if (!expiryMonth || !expiryYear) {
-    errorMessage.textContent = 'Please select a valid expiry date!';
-    errorMessage.style.display = 'block';
+    errorMessage.textContent = "Please select a valid expiry date!";
+    errorMessage.style.display = "block";
     return;
   }
 
-  // Get the current date
-  let currentDate = new Date();
-  let currentMonth = currentDate.getMonth() + 1;  // Months are 0-indexed in JS
-  let currentYear = currentDate.getFullYear();
+  const currentDate = new Date();
+  const currentMonth = currentDate.getMonth() + 1;
+  const currentYear = currentDate.getFullYear();
 
-  // Check if the expiry date is in the future
   if (parseInt(expiryYear) < currentYear || (parseInt(expiryYear) === currentYear && parseInt(expiryMonth) < currentMonth)) {
-    errorMessage.textContent = 'Expiry date must not be in the past!';
-    errorMessage.style.display = 'block';
+    errorMessage.textContent = "Expiry date must not be in the past!";
+    errorMessage.style.display = "block";
     return;
   }
 
-  // If validation passes, process payment
-  errorMessage.style.display = 'none';
-  alert('Payment successful! Your flight is confirmed.');
+  errorMessage.style.display = "none";
 
-  // Add the selected flight to bookings
+  // Create booking on the server
   if (selectedFlight) {
-    bookings.push(selectedFlight);
+    try {
+      const response = await fetch("http://localhost:8001/bookings", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${localStorage.getItem("authToken")}` // Assuming you store the token in localStorage
+        },
+        body: JSON.stringify({flight_id: selectedFlight.flight_id}),
+      });
+
+      if (response.ok) {
+        alert("Payment successful! Your flight is confirmed.");
+        fetchBookings(); // Fetch and display bookings after successful payment
+        selectedFlight = null; // Reset selection
+      } else {
+        alert("Failed to create booking. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error creating booking:", error);
+      alert("An error occurred while creating the booking. Please try again later.");
+    }
   }
 
-  displayBookings();
-
-  // Hide payment section and show booking confirmation
-  document.getElementById('payment-section').style.display = 'none';
-  document.getElementById('selected-flight').style.display = 'none';
+  document.getElementById("payment-section").style.display = "none";
+  document.getElementById("selected-flight").style.display = "none";
 });
 
-// Display bookings
-function displayBookings() {
-  let bookingsList = document.getElementById('bookings-list');
-  bookingsList.innerHTML = '';
-  bookings.forEach((booking, index) => {
-    let li = document.createElement('li');
-    li.innerHTML = `Booking ID: ${index + 1} - ${booking.airline} - ${booking.from} to ${booking.to} on ${booking.date}
-    <div class="action-btns">
-      <button class="modify-btn" onclick="modifyBooking(${index})">Modify</button>
-      <button class="delete-btn" onclick="deleteBooking(${index})">Delete</button>
-    </div>`;
-    bookingsList.appendChild(li);
+// Fetch and display bookings on page load
+async function fetchBookings() {
+  try {
+    const response = await fetch("http://localhost:8001/bookings", {
+      method: "GET",
+      headers: {
+        "Authorization": `Bearer ${localStorage.getItem("authToken")}` // Assuming you store the token in localStorage
+      },
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      bookings = data.bookings; // Assuming the response contains an array of bookings
+      const bookingList = data.bookings;
+      displayBookings(bookingList);
+    } else {
+      console.error("Failed to fetch bookings.");
+    }
+  } catch (error) {
+    console.error("Error fetching bookings:", error);
+  }
+}
+
+// Display all bookings
+function displayBookings(bookingList) {
+  const bookingsList = document.getElementById("bookings-list");
+  bookingsList.innerHTML = "";
+  bookingList.forEach((booking, index) => {
+    let flight = flights.flights.find((i) => {
+      return i.id == booking.flight_id
+    });
+    if(flight){
+      const listItem = document.createElement("li");
+    listItem.innerHTML = `
+      Booking ID: ${booking.id} - ${airlineMapping[flight.origin] || "Unknown Airline"} - ${flight.origin} to ${flight.destination} on ${flight.departure_date}
+      <div class="action-btns">
+        <button onclick="modifyBooking(${index})">Modify</button>
+        <button onclick="deleteBooking(${index})">Delete</button>
+      </div>
+    `;
+    bookingsList.appendChild(listItem); 
+    }
   });
 }
 
-// Modify booking (change the travel date)
+// Modify a booking
 function modifyBooking(index) {
-  let booking = bookings[index];
-  let newDate = prompt("Enter the new travel date (yyyy-mm-dd):", booking.date);
-  
+  const newDate = prompt("Enter the new travel date (yyyy-mm-dd):", bookings[index].departure_date);
   if (newDate) {
-    bookings[index].date = newDate;
+    bookings[index].departure_date = newDate;
     displayBookings();
-    alert(`Booking modified successfully! New travel date: ${newDate}`);
-  } else {
-    alert('No changes made.');
+    alert("Booking modified successfully!");
   }
 }
 
-// Delete booking
+// Delete a booking
 function deleteBooking(index) {
   bookings.splice(index, 1);
   displayBookings();
-  alert('Booking deleted successfully!');
+  alert("Booking deleted successfully!");
 }
 
 // Logout function
 function logout() {
-  window.location.href = 'login.html'; // Redirect to login page
+  window.location.href = "login.html"; // Redirect to login page
 }
 
 // Toggle return date visibility based on trip type
-document.getElementById('trip-type').addEventListener('change', (e) => {
-  if (e.target.value === 'round-trip') {
-    document.getElementById('return-date-div').style.display = 'block';
+document.getElementById("trip-type").addEventListener("change", (e) => {
+  if (e.target.value === "round-trip") {
+    document.getElementById("return-date-div").style.display = "block";
   } else {
-    document.getElementById('return-date-div').style.display = 'none';
+    document.getElementById("return-date-div").style.display = "none";
   }
 });

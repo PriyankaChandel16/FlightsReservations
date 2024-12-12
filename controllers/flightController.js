@@ -1,5 +1,7 @@
 // src/controllers/flightController.js
 const flightService = require("../services/flightService");
+const jwt = require("jsonwebtoken");
+const SECRET_KEY = "your-secret-key";
 
 // Route to fetch all available flights
 async function getAllFlights(req, res) {
@@ -58,5 +60,36 @@ async function getFlightById(req, res) {
     res.status(500).json({ error: error.message });
   }
 }
+//// Delete a flight
+async function deleteFlight(req, res) {
+  const { id } = req.params;  // Get flight ID from route params
 
-module.exports = { getAllFlights, addFlight, getFlightById, searchFlights };
+  // Extract token from headers
+  const token = req.headers.authorization?.split(" ")[1];
+  if (!token) {
+    return res.status(401).json({ error: "Unauthorized: Token missing" });
+  }
+
+  try {
+    // Decode the token to get user details
+    const decoded = jwt.verify(token, SECRET_KEY);
+
+    // Check if the user role is admin
+    if (decoded.role !== "admin") {
+      return res.status(403).json({ error: "Unauthorized: Only admins can delete flights" });
+    }
+
+    // Call flight service to delete the flight
+    const result = await flightService.deleteFlightById(id);
+    if (!result) {
+      return res.status(404).json({ error: 'Flight not found' });
+    }
+
+    res.status(200).json({ message: 'Flight deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+}
+
+  
+module.exports = { getAllFlights, addFlight, getFlightById, searchFlights, deleteFlight };

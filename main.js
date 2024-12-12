@@ -40,17 +40,23 @@ app.get("/flights", flightController.getAllFlights);
 // admin
 app.post("/flights", authenticateToken, flightController.addFlight);
 // app.get("/flights/search", authenticateToken, flightController.searchFlights);
-// app.put("/flights", authenticateToken, flightController.updateFlight);
-// app.delete("/flights", authenticateToken, flightController.deleteFlight);
+//app.put("/flights", authenticateToken, flightController.updateFlight);
+ //app.delete("/flights", authenticateToken, flightController.deleteFlight);
 // app.get("/flights", authenticateToken, flightController.getAllFlight);
 
 // app.get("/bookings", authenticateToken, bookingController.getAllBookings);
 
 // user
-// app.post("/bookings", authenticateToken, bookingController.createBooking);
+app.post("/bookings", authenticateToken, bookingController.createBooking);
+app.get("/bookings", authenticateToken, bookingController.getBookings);
 // app.post("/payments", authenticateToken, paymentController.createPayment);
 // app.get("/bookings/my", authenticateToken, bookingController.myBookings);
-// app.delete("/bookings", authenticateToken, bookingController.deleteBookings);
+//app.delete("/bookings", authenticateToken, bookingController.deleteBookings);
+// In main.js or your routes file
+
+// Route to delete a flight
+app.delete('/flights/:id', flightController.deleteFlight); // Ensure this is pointing to the correct controller function
+
 
 app.listen(port, () => {
   console.log(`Server running on http://localhost:${port}`);

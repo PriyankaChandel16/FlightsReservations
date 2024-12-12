@@ -4,7 +4,11 @@ const db = require('../db/db');
 // Fetch all bookings
 async function getBookings() {
   return new Promise((resolve, reject) => {
-    const query = `SELECT * FROM bookings`;
+    const query = `
+      SELECT bookings.*, users.username AS user_name
+      FROM bookings 
+      JOIN users ON bookings.user_id = users.id
+    `;
     db.all(query, (err, rows) => {
       if (err) return reject(err);
       resolve(rows);
@@ -13,15 +17,25 @@ async function getBookings() {
 }
 
 // Create a new booking
-async function createBooking(flight_id, user_id, seat_count) {
+async function createBooking(
+  flightId,
+  userId
+) {
   return new Promise((resolve, reject) => {
-    const query = `INSERT INTO bookings (flight_id, user_id, seat_count) 
-                   VALUES (?, ?, ?)`;
-    db.run(query, [flight_id, user_id, seat_count], function(err) {
-      if (err) return reject(err);
-      resolve({ id: this.lastID, flight_id, user_id, seat_count });
-    });
-  });
-}
+  const query = `INSERT INTO bookings (flight_id,user_id,seat_count,booking_status) 
+                   VALUES (?, ?, ?, ?)`;
+                   
+                   db.run(
+                    query,
+                    [flightId, userId, null,'confirmed'],
+                    function (err) {
+                      if (err) return reject(err);
+                      resolve({
+                        id: this.lastID,
+                      });
+                    }
+                  );
+                });
+              }
 
 module.exports = { getBookings, createBooking };
